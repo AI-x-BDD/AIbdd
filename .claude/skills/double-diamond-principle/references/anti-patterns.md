@@ -1,6 +1,6 @@
 # 常見錯誤與 Anti-patterns
 
-發現使用者的做法可能違反下列模式時：不是直接指責或強制重寫，而是找到對應的「症狀 → 根因 → 改善建議」，用 Project-Aware 的方式提出——先確認脈絡，再給方案；高風險的修正動作仍要先確認（見 [rules.md](rules.md#user-interaction-rules何時該問何時可以直接做)）。
+發現使用者的做法可能違反下列模式時：不是直接指責或強制重寫，而是找到對應的「症狀 → 根因 → 改善建議」，用 Project-Aware 的方式提出——先確認脈絡，再給方案；高風險的修正動作仍要先確認（見 [Rule-DoubleDiamond-使用者互動.md](../rules/Rule-DoubleDiamond-使用者互動.md)）。
 
 ## 1. Solution-First — 跳過問題直接做方案
 
@@ -28,14 +28,14 @@
 - **症狀**：持續蒐集資料、訪談，遲遲不進入 Define，理由永遠是「還需要多了解一點」
 - **根因**：害怕收斂後被證明是錯的，或缺乏明確的 Exit Criteria
 - **偵測方式**：檢查是否已出現重複模式（飽和），若已飽和卻仍不收斂
-- **改善建議**：對照 [rules.md](rules.md#validation-rules證據夠不夠的判斷標準) 的飽和度標準，達標就強制產出候選 Problem Statement，即使不完美
+- **改善建議**：對照 [Rule-DoubleDiamond-證據驗證.md](../rules/Rule-DoubleDiamond-證據驗證.md) 的飽和度標準，達標就強制產出候選 Problem Statement，即使不完美
 
 ## 5. HMW / Problem Statement 裡預埋解法
 
 - **症狀**：Problem Statement 或 HMW 寫成「使用者需要一個 XX 功能」而非「使用者有 XX 需求/落差」
 - **根因**：習慣性用方案語言思考，或跳過了 User→Problem→Solution 的順序
 - **偵測方式**：檢查句子裡是否出現具體功能/介面/技術名詞
-- **改善建議**：改寫成 solution-neutral 句型（見 [rules.md](rules.md#2-define收斂--問題空間右半) 的句型規則），把原本寫進去的方案移到 Develop 階段的候選清單
+- **改善建議**：改寫成 solution-neutral 句型（見 [Rule-DoubleDiamond-ProblemStatement.md](../rules/Rule-DoubleDiamond-ProblemStatement.md)），把原本寫進去的方案移到 Develop 階段的候選清單
 
 ## 6. Prototype = Final Product — 把第一個原型當成品直接上線
 

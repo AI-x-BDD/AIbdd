@@ -8,7 +8,7 @@
 2. **判斷專案類型**：新產品／既有產品新功能／服務或內部流程／策略性專案／單純的 bug 或規格調整。
 3. **判斷嚴謹度分級**：依 [principles.md](principles.md#project-aware專案規模決定嚴謹度不是流程決定專案) 分成輕量／標準／完整。
 4. **判斷目前所處階段**：見下方 Phase Detection Decision Tree。
-5. **檢查關鍵資訊缺口**：目標使用者、成功定義、資源/時間限制、既有研究資料、決策權歸屬。任一缺口且會影響下一步判斷 → 依 [rules.md](rules.md#user-interaction-rules何時該問何時可以直接做) 先問，不猜。
+5. **檢查關鍵資訊缺口**：目標使用者、成功定義、資源/時間限制、既有研究資料、決策權歸屬。任一缺口且會影響下一步判斷 → 依 [Rule-DoubleDiamond-使用者互動.md](../rules/Rule-DoubleDiamond-使用者互動.md) 先問，不猜。
 
 盤點完成後，內部形成一份「現況摘要」（所處階段、嚴謹度分級、已有的證據、缺口），作為後續所有判斷的依據。**任何階段/方法判斷都要能回答「我是根據哪個證據或使用者回覆做的判斷」**。
 
@@ -55,7 +55,7 @@ Q2: 是否已有足夠證據（重複模式／測試結果／三角驗證）
 1.2 盤點既有資料（analytics、support tickets、先前研究、市場/競品資訊）
 1.3 依 [tools.md](tools.md) 的「研究方法」選擇規則挑研究方法，執行研究（訪談/觀察/日誌研究/問卷等）
 1.4 整理 raw data：逐字稿、觀察筆記、量化摘要，先不下結論
-1.5 檢查 [Discover Exit Criteria](rules.md#1-discover發散--問題空間左半) → 達標進 Stage 2；未達標則繼續研究，或依 Exception Handling 與使用者確認是否接受較弱證據前進
+1.5 檢查 Discover Exit（見 [Rule-DoubleDiamond-四階段Gate.md](../rules/Rule-DoubleDiamond-四階段Gate.md) Rule 1）→ 達標進 Stage 2；未達標則繼續研究，或依 [Rule-DoubleDiamond-例外與退回.md](../rules/Rule-DoubleDiamond-例外與退回.md) 與使用者確認是否接受較弱證據前進
 
 ### Stage 2 — Define（收斂）
 2.1 Synthesis：affinity mapping／分群，找出重複主題
@@ -63,15 +63,15 @@ Q2: 是否已有足夠證據（重複模式／測試結果／三角驗證）
 2.3 撰寫多個候選 Problem Statement（每個都 solution-neutral，見句型規則）
 2.4 轉換成 How Might We（HMW）清單並排序（依 impact／feasibility／與目標的關聯度）
 2.5 與使用者/關係人確認，sign-off Design Brief 與成功指標
-2.6 檢查 [Define Exit Criteria](rules.md#2-define收斂--問題空間右半) → 達標進 Stage 3
+2.6 檢查 Define Exit（見 [Rule-DoubleDiamond-四階段Gate.md](../rules/Rule-DoubleDiamond-四階段Gate.md) Rule 2）→ 達標進 Stage 3
 
 ### Stage 3 — Develop（發散→內部小收斂循環）
 3.1 依 Design Brief 進行 ideation（見 [tools.md](tools.md) 的「Ideation 方法」）
 3.2 初步篩選候選概念（dot voting／impact-effort matrix），**避免把全部 idea 都做成原型**
 3.3 針對候選概念做低成本原型（paper sketch／wireframe／service blueprint／wizard of oz，依內容類型選）
 3.4 使用者測試 + 回饋收集，每輪記錄學習
-3.5 依回饋決定：繼續迭代同一概念 / 切換其他候選概念 / 退回 Define 重新定義問題（見 [rules.md](rules.md#exception-handling例外情況處理)）
-3.6 檢查 [Develop Exit Criteria](rules.md#3-develop發散--解決方案空間左半) → 達標進 Stage 4
+3.5 依回饋決定：繼續迭代同一概念 / 切換其他候選概念 / 退回 Define 重新定義問題（見 [Rule-DoubleDiamond-例外與退回.md](../rules/Rule-DoubleDiamond-例外與退回.md)）
+3.6 檢查 Develop Exit（見 [Rule-DoubleDiamond-四階段Gate.md](../rules/Rule-DoubleDiamond-四階段Gate.md) Rule 3 與 [Rule-DoubleDiamond-證據驗證.md](../rules/Rule-DoubleDiamond-證據驗證.md)）→ 達標進 Stage 4
 
 ### Stage 4 — Deliver（收斂）
 4.1 最終化選定方案的細節（視覺/技術/內容/流程）
@@ -98,5 +98,5 @@ Q2: 是否已有足夠證據（重複模式／測試結果／三角驗證）
 |---|---|
 | Discover → Define | 研究紀錄（訪談/觀察/資料摘要）、insight 清單、候選機會領域清單 |
 | Define → Develop | 已認可的 Problem Statement、優先排序的 HMW、Design Brief、成功指標 |
-| Develop → Deliver | ≥2 個原型的使用者測試結果、feasibility/viability 檢查結果、風險清單與對策、MVP 範圍與驗收標準 |
+| Develop → Deliver | 依嚴謹度：輕量 ≥1 概念使用者測試；標準/完整 ≥2 差異化概念各至少 1 輪測試（見 `Rule-DoubleDiamond-證據驗證.md`）；feasibility/viability、風險與 MVP/驗收標準 |
 | Deliver → 完成/下一週期 | 上線紀錄、回饋機制、成效追蹤指標、事後學習紀錄 |

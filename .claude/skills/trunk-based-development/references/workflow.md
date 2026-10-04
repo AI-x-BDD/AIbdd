@@ -27,7 +27,7 @@ flowchart TD
 
 ## Stage 0：現況盤點（Evidence First）
 
-見 [SKILL.md](../SKILL.md#stage-0啟動時必做盤點專案現況evidence-first) 的指令清單。輸出：trunk 名稱、活躍分支與年齡、CI 是否存在、flag 基礎設施是否存在、目前風格分類（TBD-like / Gitflow-like / 隨意）。若關鍵資訊仍缺（release 節奏、部署環境、flag 系統），先問，不進入 Stage 1。
+依 [SKILL.md](../SKILL.md) **Phase 0**：執行 `scripts/analyze_tbd_context.py`，並以 `templates/context-summary.md` 產出摘要。若關鍵資訊仍缺（release 節奏、部署環境、flag 治理），依 `rules/Rule-TBD-Git操作與互動.md` 先問，不進入 Stage 1。
 
 ## Stage 1：任務分類與規模估算
 
@@ -76,7 +76,7 @@ flowchart TD
 
 ## Stage 4：Commit
 
-依 [rules.md](rules.md#commit-規則) 的粒度與訊息慣例。每個 commit 盡量保持可獨立建置。
+依 `rules/Rule-TBD-Commit與Review.md` 的粒度；commit 訊息委派 **git-conventional-commit** skill。每個 commit 盡量保持可獨立建置。
 
 ## Stage 5：與 trunk 同步（Integration 前檢查，Decision Tree #3）
 
@@ -106,7 +106,7 @@ CI 必須綠燈才能進 Stage 8。若紅燈：回到 Stage 3 修，不要繞過
 
 ## Stage 8：Merge to Trunk
 
-依 [rules.md](rules.md#integration合併回-trunk-規則) 選合併策略（squash/merge commit/rebase）。合併後：
+依 `rules/Rule-TBD-Branch與Merge.md` 選合併策略（squash/merge commit/rebase）。合併後：
 - 立即刪除該短命分支（PR 記錄保留，分支本身不需要留）。
 - 確認 post-merge 的 trunk build 仍是綠的；若因為與其他人的變更組合後才出問題（Google 稱為 post-submit 失敗），優先 fix-forward，是別人的 commit 造成的則先確認再處理。
 
@@ -125,4 +125,4 @@ CI 必須綠燈才能進 Stage 8。若紅燈：回到 Stage 3 修，不要繞過
 
 - 排入 Feature Flag 清理任務（到期或 100% rollout 後移除，這是 Definition of Done 的一部分，不是可選）。
 - 掃描是否有分支因為這次工作而可以刪除。
-- 視情境執行一次 [rules.md](rules.md#validation-rulestbd-健康度檢查) 的健康度檢查，尤其是在完成一個較大功能之後。
+- 視情境執行 Phase 5 健康度檢查（`analyze_tbd_context.py --include-health` + `templates/health-check-report.md`），尤其是在完成一個較大功能之後。

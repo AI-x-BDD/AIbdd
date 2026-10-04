@@ -7,7 +7,7 @@
 **使用者**：「登入頁的錯誤訊息文字打錯了，幫我修一下並上線。」
 
 **AI 行為**：
-1. Stage 0 盤點：`git log --oneline -10` 發現這個 repo 過去所有 commit 都是直接推到 `main`，沒有 PR 記錄，`git branch -a` 只有 `main`，沒有 CI 設定檔。判斷為極小團隊、慣例是直推 trunk。
+1. Phase 0：`analyze_tbd_context.py` 顯示 `workflow_style_hint=tbd_like_minimal`、無 CI；補看 `git log` 確認常態直推 `main`。判斷為極小團隊、慣例是直推 trunk。
 2. Stage 1 分類：單一檔案文字修正，屬於 trivial bugfix。
 3. Decision Tree #1：trivial + 慣例允許直推 → 本地跑測試（若有）→ 直接在 `main` 上 commit。
 4. 因為沒有偵測到 CI／部署管線，AI 主動說明：「這個修正我已經直接 commit 到 `main`；但我沒有找到自動部署設定，要幫你上線的話，需要你告訴我目前怎麼部署（例如手動觸發哪個腳本、或有沒有 CI/CD）。」→ 這是 Minimal Assumption：不假設部署方式。
@@ -17,7 +17,7 @@
 **使用者**：「我們要換一套新的結帳流程，UI 和後端都要改，大概要做好幾天。」
 
 **AI 行為**：
-1. Stage 0 盤點：發現專案用 GitHub、有 branch protection 要求 PR + CI 通過才能合併，也有 `unleash-client` 這個依賴（代表已有 Feature Flag 系統）。
+1. Phase 0：腳本偵測到 CI 路徑與 `unleash-client` 依賴線索；再確認 branch protection 要求 PR + CI 通過才能合併。
 2. Stage 1 分類：Feature，使用者可見，預估 3 天以上完成。
 3. Decision Tree #2：跨過 1 天，且動到使用者可觸及路徑 → 建議用 Feature Flag。
 4. 因為已偵測到 Unleash，AI 直接建議：新增 flag `new_checkout`，預設關閉；提出開發計畫——每天把當天完成的部分（即使 UI 還沒完全接好）合併回 `main`（flag 關閉狀態下不影響現有使用者），而不是等三天後一次性合併一個大 PR。
@@ -44,8 +44,8 @@
 **使用者**：「我們現在是 Gitflow，有 develop、release、hotfix 分支，想改成 Trunk-Based Development。」
 
 **AI 行為**：
-1. Stage 0 盤點：確認 `develop`、`release/*`、`hotfix/*` 確實規律存在且被使用，CI 目前跑在 `develop` 而不是可能的未來 trunk。
-2. **不會**直接刪掉 `develop` 或重寫分支策略。依 Project-Aware 原則，先確認遷移的前提條件是否齊備（見 [principles.md](principles.md) 與 [rules.md](rules.md#exception-handling例外處理)）：測試安全網是否足夠可信、審查速度是否能壓在同一天、CI 是否能快速回饋。
+1. Phase 0：腳本 `workflow_style_hint=gitflow_like`；確認 `develop`、`release/*`、`hotfix/*` 規律存在，CI 目前跑在 `develop`。
+2. **不會**直接刪掉 `develop` 或重寫分支策略。依 Project-Aware 原則，先確認遷移前提（見 [Rule-TBD-例外與健康度.md](../rules/Rule-TBD-例外與健康度.md) Rule 4）：測試安全網、審查速度、CI 回饋時間。
 3. 主動詢問：「導入 TBD 前我想先確認幾件事：(1) 目前的自動化測試覆蓋率/可信度如何？(2) PR 審查通常多久會有人看？(3) 是否有多個正式版本需要同時維護（這會影響要不要保留 release branch）？」——這是資訊不足必須問的情境，不猜測直接動手改分支策略。
 4. 待使用者回覆後，才提出漸進式遷移計畫（例如：先把 CI 切到以 `main` 為準、逐步縮短 `develop` 存活週期、最終讓 `main` 變成唯一整合中心，`release/*` 依 Exception Handling 規則保留但單向不回合併）。
 

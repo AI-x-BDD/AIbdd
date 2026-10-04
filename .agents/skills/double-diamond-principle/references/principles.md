@@ -38,7 +38,7 @@ Design Council 官方原文：「The first diamond helps people **understand, ra
 | **Put people first**（以人為本） | 從理解使用者的需求、能力與期望開始，不從內部假設開始 | 沒有使用者資料/回饋佐證前，不得憑空生成 persona、需求或「使用者應該想要」的判斷；缺資料就問，不猜（見 Minimal Assumption） |
 | **Communicate visually & inclusively**（視覺化與包容性溝通） | 用視覺化方式幫助不同角色對問題與想法建立共同理解 | AI 的產出優先用表格、journey map、決策樹、結構化清單呈現，而非長篇散文；讓不懂 Double Diamond 的使用者也能看懂結論 |
 | **Collaborate & co-create**（協作共創） | 與他人一起工作，並從其他人的做法中獲得啟發 | 關鍵決策點（Problem Statement 定案、方案取捨、是否進入下一階段）要邀請使用者/關係人確認，不由 AI 單方面拍板 |
-| **Iterate, iterate, iterate**（持續迭代） | 儘早反覆測試想法，藉此抓錯誤、降風險、建立信心 | 沒有「一次做對」這件事；驗證結果推翻假設時，退回前一階段重新探索是正常流程，不是失敗（詳見 [rules.md](rules.md#exception-handling)） |
+| **Iterate, iterate, iterate**（持續迭代） | 儘早反覆測試想法，藉此抓錯誤、降風險、建立信心 | 沒有「一次做對」這件事；驗證結果推翻假設時，退回前一階段重新探索是正常流程，不是失敗（詳見 [Rule-DoubleDiamond-例外與退回.md](../rules/Rule-DoubleDiamond-例外與退回.md)） |
 
 ## User → Problem → Solution：三層焦點與順序
 

@@ -4,7 +4,7 @@
 
 | Workflow 階段 | 工具類別 | 例子 | 解決什麼問題 |
 |---|---|---|---|
-| Stage 0 現況盤點 | Git CLI / 主機 API | `git`、`gh`/`glab` CLI | 讀分支、PR、branch protection 現況 |
+| Stage 0 現況盤點 | 盤點腳本 + Git CLI | `scripts/analyze_tbd_context.py`、`git`、`gh`/`glab` CLI | 結構化 JSON（trunk、分支年齡、CI/flag 線索）；必要時再查 PR / branch protection |
 | Stage 2 分支/PR | Git 主機 | GitHub / GitLab / Bitbucket | 建 short-lived branch、開 PR、套 branch protection |
 | Stage 3 開發（解耦） | Feature Flag 平台 | LaunchDarkly、Unleash、Flagsmith、FeatBit，或專案自建的 config-based flag | 把未完成功能安全合併進 trunk；支援漸進 rollout、瞬間關閉 |
 | Stage 4 Commit | Commit 規範/檢查 | Conventional Commits 規範、專案內若已有 `git-conventional-commit` skill 就照它 | 讓 commit 訊息可被自動化（版本推導、changelog）解析 |

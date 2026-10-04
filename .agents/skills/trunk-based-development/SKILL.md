@@ -1,18 +1,14 @@
 ---
 name: trunk-based-development
 description: >-
-  以 Trunk-Based Development (TBD) 為核心的 Git / 開發流程判斷與執行 Skill。啟動後 AI 會自動盤點專案目前的
-  Git 與分支狀態、分析當前任務與變更範圍，依據 TBD 的道(理念)法(規範)術(SOP/Decision Tree)器(工具)四層知識，
-  判斷應採用的 Branch/Merge 策略、Short-Lived Branch 是否超時、Commit/Integration/Review/Test 的時機、
-  是否需要 Feature Flag 或 Branch by Abstraction 解耦，並能偵測違反 TBD 的情況並提出具體改善方式。
-  資訊不足時會主動詢問而非猜測，且能在使用者同意下直接執行 Git 操作與開發流程，高風險操作（force-push、
-  刪除有未合併 commit 的分支、直接推送到受保護的 trunk、刪除/切換 production feature flag、切 release
-  branch 等）一律先確認。使用情境：使用者要求以 Trunk-Based Development 開發、要決定分支/合併策略、
-  要規劃 feature flag 上線、要檢查目前流程是否符合 TBD、要從 Gitflow 等模式導入/遷移到 TBD，或要 AI
-  接手完成「需求→Branch→開發→Commit→Integration→Review→Test→Merge→Release」全流程時。常見觸發詞：
-  「Trunk-Based Development」「TBD」「trunk」「短命分支」「short-lived branch」「feature flag」
-  「Branch by Abstraction」「release branch」「分支策略」「merge 策略」「Gitflow 遷移」「這樣做對嗎」等，
-  即使使用者沒有直接說出「Trunk-Based Development」這個名稱也適用。
+  以 Trunk-Based Development (TBD) 為核心的 Git / 開發流程判斷與執行 Skill。啟動後依 SKILL.md
+  內 SOP Phase 逐步執行：自動盤點 Git 與分支狀態、產出現況摘要、依 TBD 原則判斷 Branch/Merge、
+  Short-Lived Branch、Integration、Review、CI、Feature Flag、Release 策略，並偵測違反 TBD 的
+  情況提出改善。Commit 訊息委派 git-conventional-commit。資訊不足時先問；高風險 Git/release/flag
+  操作先確認。使用情境：TBD 開發、分支/合併策略、feature flag、流程健檢、Gitflow 漸進遷移、
+  或 AI 接手「需求→Branch→開發→Commit→Integration→Review→Test→Merge→Release」全流程。
+  觸發詞：Trunk-Based Development、TBD、trunk、短命分支、feature flag、Branch by Abstraction、
+  release branch、分支策略、Gitflow 遷移、「這樣做對嗎」等。
 disable-model-invocation: true
 ---
 
@@ -20,123 +16,108 @@ disable-model-invocation: true
 
 ## 定位
 
-這不是一份 TBD 教學文件，而是讓 AI 具備**判斷力**、能在 Trunk-Based Development 的框架下**主動 Own 專案 Git / 開發流程**的 Workflow Skill。使用者不需要懂 TBD；AI 要懂，並且要用證據（Git 現況、CI 結果、變更內容）做判斷，而不是套公式。
+這不是 TBD 教學文件，而是讓 AI 在 Trunk-Based Development 框架下**主動 Own Git / 開發流程**的 Workflow Skill。使用者不需要懂 TBD；AI 須用證據（腳本 JSON、Git、CI）判斷，而非套公式。
 
-**核心工作方式**：Evidence First（先盤點現況）→ Project-Aware（尊重專案既有慣例）→ 依 Decision Tree 判斷 → 資訊不足就問 → 低風險自動做、高風險先確認。
+**核心工作方式**：Evidence First → Project-Aware → 依 Decision Snapshot / workflow 決策樹 → 資訊不足就問 → 低風險自動做、高風險先確認。
 
 ## 核心原則（道，細節見 [principles.md](references/principles.md)）
 
 | 原則 | 一句話 |
 |---|---|
-| Trunk First | 以單一 trunk（通常是 `main`/`master`）為整合中心，長期分支是例外不是常態 |
-| Short-Lived Branch | 分支存活時間以「小時」計，硬上限 1–2 天，超過就是風險訊號 |
-| Small Changes | 小批次、高頻率整合，diff 越小，風險與 review 成本越低 |
-| Continuous Integration | 每天至少整合回 trunk 一次；trunk 永遠必須是可建置/可測試的 |
-| Automation First | 用自動化測試與 CI 取代人工把關，讓「小步快跑」變得安全 |
-| Feature Decoupling | 用 Feature Flag / Branch by Abstraction 把「合併」與「上線」分開 |
-| Project-Aware | 先看專案現有慣例與限制，再決定要不要調整，不盲目套規則 |
-| Evidence First | 用 Git log、CI 結果、實際 diff 做判斷依據，不是憑印象 |
-| Minimal Assumption | 關鍵資訊不足（release 節奏、部署環境、是否有 flag 系統…）就問，不猜 |
+| Trunk First | 以單一 trunk 為整合中心，長期分支是例外 |
+| Short-Lived Branch | 硬上限 1–2 天，超過即風險訊號 |
+| Small Changes | 小批次、高頻整合，diff 越小越好 |
+| Continuous Integration | 至少每日整合；trunk 須可建置/可測試 |
+| Automation First | 用 CI/測試讓小步快跑安全 |
+| Feature Decoupling | Feature Flag / Branch by Abstraction 分離合併與上線 |
+| Project-Aware | 尊重專案既有慣例，不盲目套規則 |
+| Evidence First | 用 Git/CI 證據判斷 |
+| Minimal Assumption | 關鍵資訊不足就問 |
 
-## Stage 0：啟動時必做——盤點專案現況（Evidence First）
+## Decision Snapshot（快徑；偏離時須 READ 對應 RuleFile）
 
-在做任何 branch/merge/flag 判斷之前，先用只讀指令蒐證，不用問使用者就能做：
+**Q1 — 直推 trunk 還是開分支？** trivial + 慣例允許直推 + 本地測試綠 → 可直推；否則 short-lived branch。
 
-```bash
-git status
-git remote -v
-git branch -a --sort=-committerdate          # 有哪些分支、誰最舊
-git log --oneline --graph --decorate --all -30
-git log <trunk>..HEAD --oneline               # 目前分支領先 trunk 多少
-git log --merges -10 <trunk>                  # 過去整合模式：常態直推還是走 PR
-```
+**Q2 — 分支還「短命」嗎？** >2 天或 diff >~400 行或多次衝突 → 拆 PR / 配對完成 / flag 先併回部分。
 
-同時確認：
-- **Trunk 名稱**：`main` 或 `master`（用 `git symbolic-ref refs/remotes/origin/HEAD` 或 remote 預設分支確認，不要假設）。
-- **是否已有 CI**：`.github/workflows/`、`.gitlab-ci.yml`、`Jenkinsfile`、`azure-pipelines.yml` 等是否存在。
-- **是否已有長期分支**：`develop`、`release/*`、`hotfix/*` 是否存在 → 代表專案目前可能是 Gitflow 風格，屬於 Project-Aware 判斷輸入，不代表要立刻改。
-- **是否已有 Feature Flag 機制**：搜尋 `.env`、config、依賴清單（`package.json`/`requirements.txt`/`go.mod` 等）中是否有 LaunchDarkly / Unleash / Flagsmith / 自建 flag 模組等關鍵字。
-- **是否已有 commit 慣例**：是否符合 Conventional Commits；若專案已安裝 `git-conventional-commit` 這類 skill，Commit 訊息一律照該規則產生。
+**Q3 — 需要解耦嗎？** 跨 >1 天且使用者可感 → Feature Flag；大範圍內部重構 → Branch by Abstraction；後端替換驗證 → Dark Launch；否則不需要。
 
-蒐證完成後，形成一份內部「現況摘要」（trunk 名稱、活躍分支數與各分支存活時間、CI 是否存在、flag 基礎設施是否存在、目前風格是 TBD-like / Gitflow-like / 隨意），作為後續所有判斷的依據。**任何規則判斷都要能回答「我是根據哪個 Git/CI 證據下的判斷」**。
+**Q4 — 發布方式？** 可持續部署 → 從 trunk；多版本/審核/法規 → release branch（不合回 trunk，修復先 trunk 再 cherry-pick）。
 
-若盤點後仍缺乏關鍵資訊（見下方「User Interaction Rules」），先問，不要往下走。
+完整 Decision Tree 見 [workflow.md](references/workflow.md)。
 
-## 高層 SOP（術，完整版與每步 Decision Tree 見 [workflow.md](references/workflow.md)）
+# SOP
+
+執行時複製 checklist 追蹤進度（依任務裁剪，但 **Phase 0 不可跳過**）：
 
 ```
-Stage 0 現況盤點 → 1 任務分類 → 2 建立/直推判斷 → 3 開發(含解耦判斷)
-→ 4 Commit → 5 與 trunk 同步(Integration 前檢查) → 6 Code Review
-→ 7 Test/CI Gate → 8 Merge → 9 Release(從 trunk 或 release branch)
-→ 10 收尾(刪分支、flag 清理排程、健康度檢查)
+Progress:
+- [ ] Phase 0: 蒐證與現況摘要
+- [ ] Phase 1: 任務分類與分支策略
+- [ ] Phase 2: 開發與解耦
+- [ ] Phase 3: Commit（含委派 commit skill）
+- [ ] Phase 4: 同步、Review、CI、Merge
+- [ ] Phase 5: Release 與收尾（含健康度）
 ```
 
-## 快速判斷 Decision Snapshot
+## Phase 0 -- 蒐證與現況摘要
 
-**Q1 — 直推 trunk 還是開分支？**
-變更是否 trivial（單一檔案/小修正）且專案慣例允許直推 trunk（極小團隊、無強制 PR）且本地測試綠燈？→ 可直推。否則 → 從最新 trunk 切一條 short-lived branch。
+1. DELEGATE 自本 skill 根目錄執行 `python scripts/analyze_tbd_context.py --repo <專案根> --include-health`（若環境偏好 `uv run scripts/analyze_tbd_context.py`，且已安裝 uv，可等價使用）；腳本非 0 或非 git repo 時停止並回報，不猜測。
+2. READ 讀取 `templates/context-summary.md` 與 `templates/context-summary.example.md`，確認現況摘要的固定欄位。
+3. THINK 依腳本 JSON 填寫摘要：trunk、活躍分支、workflow_style_hint、CI/flag 線索；標記腳本無法涵蓋的缺口。
+4. READ 讀取 `rules/Rule-TBD-Git操作與互動.md` 的 Rule 1（關鍵資訊不足須先問）；若 release/部署/flag 治理/遷移範圍仍未知，先向使用者提問，**不得進入 Phase 1**。
+5. WRITE 依模板產出現況摘要（可內部使用或簡要呈報使用者）；後續所有策略判斷須能對應摘要中的證據欄位。
 
-**Q2 — 分支是否還「短命」？**
-分支年齡 > 2 天，或 diff > ~400 行，或已經跟 trunk 衝突好幾次 → 不合格。處理方式：拆成更小的 PR/stacked PR、今天內配對完成，或先用 Feature Flag 把可用部分併回去，剩下的續開新分支。
+## Phase 1 -- 任務分類與分支策略
 
-**Q3 — 需要 Feature Flag 或其他解耦技術嗎？**
-會跨過 1 天以上才完成、且會動到使用者可觸及的路徑 → Feature Flag（Release Toggle）。
-是大範圍內部實作替換、使用者無感 → Branch by Abstraction。
-是後端演算法/資料源替換、要拿真流量驗證 → Dark Launch / 並行執行。
-以上皆非（範圍小、能在 short-lived branch 期限內完成並直接整合）→ 不需要，直接整合即可。
+1. THINK 將任務分類為 bugfix / feature / refactor / chore / large migration，並估算檔案數、diff 規模、是否可於 1–2 天內完成（對照 [workflow.md](references/workflow.md#stage-1任務分類與規模估算)）。
+2. THINK 依 Decision Snapshot Q1 做初步判斷；若非 trivial 或證據不足，進入下一步讀取規則。
+3. READ 讀取 `rules/Rule-TBD-Branch與Merge.md`，依 Project-Aware 證據決定直推 trunk 或建立 short-lived branch（命名依專案慣例）。
+4. READ 若 `workflow_style_hint` 為 `gitflow_like` 或使用者要求遷移 TBD，讀取 `rules/Rule-TBD-例外與健康度.md` Rule 4，僅提出漸進方案，不擅自改寫團隊流程。
+5. WRITE 向使用者說明選定的分支策略及依據的 Git 證據；高風險 Git 操作依 `rules/Rule-TBD-Git操作與互動.md` Rule 3 先確認。
 
-**Q4 — 發布方式？**
-持續部署、能快速 fix-forward → 直接從 trunk 發布。
-需要多版本並存、上架審核、法規強制的 hardening → 從 trunk 就地切一條 release branch（不合併回 trunk，修 bug 一律先進 trunk 再 cherry-pick 下去）。
+## Phase 2 -- 開發與解耦
 
-完整、含分支節點的 Decision Tree 請讀 [workflow.md](references/workflow.md)。
+1. READ 若任務可能跨 >1 天、大範圍重構、或需真流量驗證，讀取 `rules/Rule-TBD-解耦與Flag.md`；否則依 workflow Stage 3 小步開發即可。
+2. READ 需要 Decision Tree 細節時，讀取 [workflow.md](references/workflow.md#stage-3開發含解耦判斷decision-tree-2) 對應章節。
+3. THINK 開發期間經常同步 trunk 進分支；若 Decision Snapshot Q2 顯示分支過老/過大，依 `rules/Rule-TBD-Branch與Merge.md` Rule 3 處理後再繼續。
+4. WRITE 產出或更新開發/解耦計畫（flag 名稱、owner、BbA 步驟等），並標註預期每日整合節奏。
 
-## 規則索引（法，詳見 [rules.md](references/rules.md)）
+## Phase 3 -- Commit
 
-`rules.md` 是本 Skill 的規範核心，包含逐項可執行的判斷標準：Branch/Merge 判斷規則、Short-Lived Branch 判斷標準、Commit/Integration 規則、Code Review 規則、Testing/CI 規則、Feature Flag 使用判斷框架、Release 規則、Validation Rules（TBD 健康度檢查）、Exception Handling（hotfix、大型 DB migration、法規強制 release train 等例外）、User Interaction Rules、Git 操作規則（哪些能自動做、哪些要先確認）。**做任何非顯而易見的判斷前，先讀這份文件**。
+1. READ 讀取 `rules/Rule-TBD-Commit與Review.md` Rule 1，確認 commit 粒度與建置要求。
+2. DELEGATE 當使用者要求 commit、撰寫 commit message、或本 Phase 要提交變更時，讀取並執行 **git-conventional-commit** skill 的完整 SOP（路徑優先 `.agent/skills/git-conventional-commit/SKILL.md`，其次 `.cursor/skills/git-conventional-commit/SKILL.md`）；本 skill 不跳過其驗證與高風險確認步驟。
+3. READ 任何將執行的 Git 寫入操作前，再次對照 `rules/Rule-TBD-Git操作與互動.md` Rule 2–3。
 
-## User Interaction Rules（何時該問，何時可以直接做）
+## Phase 4 -- 同步、Review、CI、Merge
 
-**資訊不足就問（Minimal Assumption），常見觸發點：**
-- 不知道 release 節奏（持續部署？固定排程？）
-- 不知道部署環境/是否能快速 rollback
-- 不知道是否已有 feature flag 系統，或是否允許新增依賴
-- 分支/變更牽涉到其他人正在進行的工作，所有權不明確
-- 變更涉及資料庫 schema、金流、權限等高風險領域，且沒有既有規範可依循
+1. READ 合併前讀取 `rules/Rule-TBD-Branch與Merge.md` Rule 4–5，完成與 trunk 同步並確認整合頻率與合併策略。
+2. READ 開 PR 與審查時讀取 `rules/Rule-TBD-Commit與Review.md` Rule 3–4。
+3. READ CI gate 與 trunk 變紅處置讀取 `rules/Rule-TBD-CI與Release.md` Rule 1–2；需要 merge queue 時讀 Rule 5。
+4. READ 執行 merge、刪分支、rebase、force-push 等操作前讀取 `rules/Rule-TBD-Git操作與互動.md` Rule 3。
+5. WRITE merge 完成後確認 post-merge trunk 健康，並刪除已合併的短命分支（低風險可自動；刪除含未合併 commit 的分支須確認）。
 
-**可直接執行（低風險、Evidence First 支撐）：**
-- 所有唯讀盤點指令（status/log/branch/diff）
-- 從最新 trunk 建立新的 short-lived branch
-- 本地小步 commit、跑測試
-- Push 自己新建的分支、開 PR
-- 依既有慣例產生 commit 訊息
+## Phase 5 -- Release 與收尾
 
-**執行前必須先跟使用者確認（高風險，即使技術上可行）：**
-`git push --force`（尤其共享分支）、直接推到受保護的 trunk 略過 CI/Review、`rebase -i` 改寫已推送/共享的歷史、刪除任何含未合併 commit 的分支、CI 未過或被跳過就 merge、刪除或切換 production 的 feature flag、切/刪除 release branch、`git reset --hard` 用在非「剛建立且僅本機」的分支、Revert 別人的 commit（Revert 自己的可自動做）。
+1. READ 讀取 `rules/Rule-TBD-CI與Release.md` Rule 3–4，依部署能力決定 release 路徑（含 flag rollout 確認，對照 `rules/Rule-TBD-解耦與Flag.md` Rule 4）。
+2. READ 若為 hotfix、大型 schema、或 release train 例外，讀取 `rules/Rule-TBD-例外與健康度.md` Rule 1–2。
+3. DELEGATE 執行 `python scripts/analyze_tbd_context.py --repo <專案根> --include-health` 更新證據（或重用 Phase 0 結果若時間間隔極短且無新 merge）。
+4. READ 讀取 `templates/health-check-report.md` 與 `templates/health-check-report.example.md`。
+5. WRITE 產出健康度報告（使用者要求健檢、完成較大功能、或發現明顯反模式時必做）；不合格項對照 [anti-patterns.md](references/anti-patterns.md) 提出改善。
+6. WRITE 排程 Feature Flag 清理（若適用），並簡要回報本次 TBD 流程結果與尚未解決的限制。
 
-詳見 [rules.md](references/rules.md#git-操作規則) 的完整清單與理由。
+## 驗證與異常
 
-## 驗證與異常處理
+- 偵測到可能違反 TBD 時：依 [anti-patterns.md](references/anti-patterns.md) 對症狀→根因→改善，Project-Aware 提出方案，高風險修復仍須確認。
+- 規則索引（法）：`rules/` 目錄 RuleFile；歷史長文索引見 [references/rules.md](references/rules.md)。
 
-- **Validation Rules**（目前流程是否符合 TBD？）：見 [rules.md](references/rules.md#validation-rules)，可隨時執行「TBD 健康度檢查」（活躍分支數、平均分支存活時間、每日整合率、CI 綠燈率、flag 是否有主人與到期日）。
-- **發現違規時**：不是直接指責或強制重寫，而是依 [anti-patterns.md](references/anti-patterns.md) 找到對應的症狀→根因→改善建議，並用 Project-Aware 的方式提出（先問脈絡，再給方案，高風險修復動作照樣要確認）。
-
-## 器：工具與 Workflow 階段對應
-
-工具（Git 主機/合併佇列、CI/CD、Feature Flag 平台、測試框架、Commit/版本自動化）依 Workflow 各階段的對應與選型原則見 [tools.md](references/tools.md)。**先偵測專案已在用什麼工具，不擅自引入新工具鏈；只有在必要且專案缺乏對應能力時才建議並徵詢使用者。**
-
-## 實際使用範例
-
-5 個完整情境（小型修復直推 vs PR、需要 Feature Flag 的多日功能、大型重構用 Branch by Abstraction、既有 Gitflow 專案的漸進導入、資訊不足時如何提問、高風險操作如何確認）見 [examples.md](references/examples.md)。
-
-## 補充資源索引
+## 補充資源
 
 | 檔案 | 何時讀 |
 |---|---|
-| [glossary.md](references/glossary.md) | 需要快速查一個術語的定義（Trunk/Feature Flag/Branch by Abstraction…）時 |
-| [principles.md](references/principles.md) | 需要說明「為什麼」、TBD 與 CI/CD/DevOps 關係、或要說服/教育使用者時 |
-| [rules.md](references/rules.md) | 做任何 branch/merge/commit/review/test/flag/release/git 操作判斷時（最常用） |
-| [workflow.md](references/workflow.md) | 需要完整 SOP 步驟或某個階段的 Decision Tree 細節時 |
-| [tools.md](references/tools.md) | 需要建議或評估工具鏈時 |
-| [anti-patterns.md](references/anti-patterns.md) | 偵測到可能違反 TBD 或使用者問「這樣做對嗎」時 |
-| [examples.md](references/examples.md) | 需要具體範例校準行為時 |
+| [glossary.md](references/glossary.md) | 術語速查 |
+| [principles.md](references/principles.md) | 說明「為什麼」 |
+| [workflow.md](references/workflow.md) | 完整 Stage SOP 與 Decision Tree |
+| [tools.md](references/tools.md) | 工具鏈對照（先偵測既有，不擅自引入） |
+| [anti-patterns.md](references/anti-patterns.md) | 「這樣做對嗎」/ 健檢改善 |
+| [examples.md](references/examples.md) | 行為校準範例 |

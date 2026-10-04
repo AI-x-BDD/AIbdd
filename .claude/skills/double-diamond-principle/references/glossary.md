@@ -46,6 +46,6 @@
 |---|---|
 | 想快速查一個術語的定義 | 本檔（glossary.md） |
 | 想知道「為什麼」、官方理念 | [principles.md](principles.md) |
-| 想做階段判斷、Gate 檢查 | [rules.md](rules.md) |
+| 想做階段判斷、Gate 檢查 | [rules/ 索引](rules.md) 或 `SKILL.md` SOP |
 | 想知道完整 SOP 步驟 | [workflow.md](workflow.md) |
 | 想選研究/發想/驗證方法 | [tools.md](tools.md) |
