@@ -1,0 +1,26 @@
+{
+  "name": "restaurant-menu-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test",
+    "smoke:005": "node scripts/smoke-005-payment.mjs",
+    "smoke:006": "node scripts/smoke-006-advanced.mjs",
+    "verify:migrations": "node scripts/verify-migrations.mjs",
+    "smoke:mssql:005": "node scripts/smoke-mssql-005.mjs",
+    "audit:sca": "npm audit --audit-level=moderate --strict-ssl=false"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.19.2",
+    "mssql": "^12.7.5"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
+  }
+}
