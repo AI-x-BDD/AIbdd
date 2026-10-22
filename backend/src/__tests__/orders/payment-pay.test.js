@@ -4,6 +4,7 @@ import { setupTestDatabase } from '../../test-utils/testHarness.js';
 import {
   addSampleCartItem,
   bootstrapCartSession,
+  countPaymentIdempotencyKeys,
   forceOrderPaymentStatus,
   getOrderForSession,
   postCreateOrder,
@@ -37,17 +38,59 @@ test('POST pay succeeds with paid status and snapshot total unchanged', async ()
   assert.equal(fetched.body.order.total, snapshotTotal);
 });
 
-test('POST pay ignores tampered total_amount in body', async () => {
+test('POST pay ignores client amounts and preserves the paid order snapshot', async () => {
   const { session, orderNumber, snapshotTotal } = await createUnpaidOrder();
 
-  const attempt = await postPayOrder(app, session, orderNumber, { body: { total_amount: '0.01' } });
+  const attempt = await postPayOrder(app, session, orderNumber, {
+    body: {
+      total_amount: '0.01',
+      unit_price: '0.01',
+      line_total: '0.01',
+      items: [{ menu_item_id: 'fake', menu_item_name: '偽造餐點', quantity: 99, line_total: '0.01' }],
+    },
+  });
   assert.equal(attempt.status, 200);
+  assert.equal(attempt.body.order.payment_status, 'paid');
   assert.equal(attempt.body.order.total, snapshotTotal);
+  assert.equal(attempt.body.order.items[0].unit_price, '220.00');
+  assert.equal(attempt.body.order.items[0].line_total, '220.00');
 
   const fetched = await getOrderForSession(app, session, orderNumber);
   assert.equal(fetched.body.order.payment_status, 'paid');
   assert.equal(fetched.body.order.total, snapshotTotal);
+  assert.equal(fetched.body.order.items[0].unit_price, '220.00');
+  assert.equal(fetched.body.order.items[0].line_total, '220.00');
 });
+
+for (const [field, value] of [['currency', 'USD'], ['order_id', 'different-order']]) {
+  test(`POST pay rejects unknown ${field} without invoking payment or changing the order`, async () => {
+    const { session, orderNumber } = await createUnpaidOrder();
+    const before = await getOrderForSession(app, session, orderNumber);
+    const mappingCount = await countPaymentIdempotencyKeys();
+    const previousAllow = process.env.ALLOW_PAYMENT_SIMULATE_BODY;
+    process.env.ALLOW_PAYMENT_SIMULATE_BODY = 'true';
+
+    let attempt;
+    try {
+      attempt = await postPayOrder(app, session, orderNumber, {
+        idempotencyKey: `rejected-${field}-${orderNumber}`,
+        body: { simulate_outcome: 'failure', [field]: value },
+      });
+    } finally {
+      if (previousAllow === undefined) delete process.env.ALLOW_PAYMENT_SIMULATE_BODY;
+      else process.env.ALLOW_PAYMENT_SIMULATE_BODY = previousAllow;
+    }
+
+    assert.equal(attempt.status, 400);
+    assert.equal(attempt.body.error.code, 'INVALID_REQUEST_BODY');
+
+    const after = await getOrderForSession(app, session, orderNumber);
+    assert.equal(after.body.order.payment_status, 'unpaid');
+    assert.equal(after.body.order.total, before.body.order.total);
+    assert.deepEqual(after.body.order.items, before.body.order.items);
+    assert.equal(await countPaymentIdempotencyKeys(), mappingCount);
+  });
+}
 
 test('POST pay returns 409 ORDER_ALREADY_PAID when already paid', async () => {
   const { session, orderNumber } = await createUnpaidOrder();
